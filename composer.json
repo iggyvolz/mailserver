@@ -1,0 +1,33 @@
+{
+    "name": "iggyvolz/mailserver",
+    "description": "A mail server written in PHP",
+    "type": "project",
+    "license": "BSD0",
+    "autoload": {
+        "psr-4": {
+            "iggyvolz\\Mailserver\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "iggyvolz\\Mailserver\\test\\": "test/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Katie Volz",
+            "email": "iggyvolz@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "~8.1.0",
+        "amphp/socket": "v2.0.0-beta.1"
+    },
+    "require-dev": {
+        "nette/tester": "^2.4",
+        "phpmailer/phpmailer": "^6.5",
+        "amphp/parallel": "2.x-dev"
+    }
+}
