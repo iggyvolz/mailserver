@@ -2,7 +2,7 @@
     "name": "iggyvolz/mailserver",
     "description": "A mail server written in PHP",
     "type": "project",
-    "license": "BSD0",
+    "license": "0BSD",
     "autoload": {
         "psr-4": {
             "iggyvolz\\Mailserver\\": "src/"
