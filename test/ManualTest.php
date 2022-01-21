@@ -19,7 +19,7 @@ Environment::setup();
  */
 // https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol#SMTP_transport_example
 $async = async(function(){
-    $mailserver = new Mailserver();
+    $mailserver = new Mailserver([]);
     $writer = new TestStream();
     $reader = new TestStream();
     async(fn() => Session::handle($mailserver, $writer, $reader));

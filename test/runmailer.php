@@ -3,8 +3,10 @@ require_once __DIR__ . "/../vendor/autoload.php";
 
 use Amp\Parallel\Sync\Channel;
 use iggyvolz\Mailserver\Mailserver;
+use function Amp\Socket\listen;
+
 return function (Channel $channel): string {
-    $mailserver = new Mailserver(port: 2525);
+    $mailserver = new Mailserver([listen("0.0.0.0:2525")]);
     try {
         $mailserver->run();
     } catch(\Amp\CancelledException) {}
