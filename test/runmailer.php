@@ -14,7 +14,7 @@ return function (Channel $channel): string {
 
     $context = (new BindContext())
         ->withTlsContext((new ServerTlsContext())->withDefaultCertificate($cert));
-    $mailserver = new MailServer([listen("0.0.0.0:2525", $context)]);
+    $mailserver = new MailServer([listen("0.0.0.0:2525", $context)], true);
     try {
         $mailserver->run();
     } catch(\Amp\CancelledException) {

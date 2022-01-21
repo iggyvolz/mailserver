@@ -33,13 +33,14 @@ final class Session
         private readonly MailServer $mailserver,
         private readonly ReadableStream $reader,
         private readonly WritableStream $writer,
+        private readonly bool $enableDebug,
     ) {
         $this->mailData = new WritableBuffer();
     }
-    public static function handle(MailServer $mailserver, ReadableStream $read, WritableStream $write): void
+    public static function handle(MailServer $mailserver, ReadableStream $read, WritableStream $write, bool $enableDebug): void
     {
         try {
-            (new self($mailserver, $read, $write))->doHandle();
+            (new self($mailserver, $read, $write, $enableDebug))->doHandle();
         } catch(\Throwable $t) {
             echo $t::class . ": " . $t->getMessage() . " in " . $t->getFile() . ":" . $t->getLine() . "\n" . $t->getTraceAsString() . "\n";
         } finally {
@@ -133,7 +134,7 @@ final class Session
         } elseif($command instanceof QuitCommand) {
             $this->closing = true;
             return new Closing();
-        } elseif($command instanceof ShutdownCommand) {
+        } elseif($command instanceof ShutdownCommand && $this->enableDebug) {
             $this->closing = true;
             $this->mailserver->cancellation->cancel();
             return new Closing();

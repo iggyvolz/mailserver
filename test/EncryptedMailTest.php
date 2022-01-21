@@ -57,8 +57,7 @@ EOF;
     Assert::same($from, $message->from);
     Assert::same($to, $message->to);
     // Get the actual message from the message
-    $contents = substr($message->contents, strpos($message->contents, "\r\n\r\n"));
-    Assert::same(trim(str_replace("\n", "\r\n", $mail->Body)), trim($contents));
+    Assert::same(trim(str_replace("\n", "\r\n", $mail->Body)), trim($message->contents));
 } finally {
     $mailer?->kill();
 }
