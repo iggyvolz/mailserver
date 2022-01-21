@@ -4,9 +4,8 @@ namespace iggyvolz\Mailserver\ReplyCode;
 
 final class ParameterSyntaxError extends ReplyCode
 {
-    public function __construct(
-    )
+    public function __toString(): string
     {
-        parent::__construct(501);
+        return "501 Parameter Syntax Error\r\n";
     }
 }

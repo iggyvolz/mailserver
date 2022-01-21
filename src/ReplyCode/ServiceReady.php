@@ -8,11 +8,10 @@ final class ServiceReady extends ReplyCode
         private string $server
     )
     {
-        parent::__construct(220);
     }
 
-    protected function toString(): string
+    public function __toString(): string
     {
-        return $this->server;
+        return "220 $this->server\r\n";
     }
 }

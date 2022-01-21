@@ -5,14 +5,13 @@ namespace iggyvolz\Mailserver\ReplyCode;
 final class StartMailInput extends ReplyCode
 {
     public function __construct(
-        public readonly ?string $text = null
+        public readonly string $text = ''
     )
     {
-        parent::__construct(354);
     }
 
-    protected function toString(): string
+    public function __toString(): string
     {
-        return $this->text ?? "";
+        return "354 $this->text\r\n";
     }
 }

@@ -5,10 +5,13 @@ namespace iggyvolz\Mailserver;
 use Amp\ByteStream\ReadableStream;
 use Amp\ByteStream\WritableBuffer;
 use Amp\ByteStream\WritableStream;
+use Amp\Socket\EncryptableSocket;
 use Amp\Socket\ResourceSocket;
 use iggyvolz\Mailserver\Command\Command;
 use iggyvolz\Mailserver\Command\DataCommand;
+use iggyvolz\Mailserver\Command\ExtendedHelloCommand;
 use iggyvolz\Mailserver\Command\HelloCommand;
+use iggyvolz\Mailserver\Command\StartTlsCommand;
 use iggyvolz\Mailserver\Command\MailCommand;
 use iggyvolz\Mailserver\Command\NoopCommand;
 use iggyvolz\Mailserver\Command\QuitCommand;
@@ -19,6 +22,7 @@ use iggyvolz\Mailserver\ReplyCode\Closing;
 use iggyvolz\Mailserver\ReplyCode\CommandNotImplemented;
 use iggyvolz\Mailserver\ReplyCode\Okay;
 use iggyvolz\Mailserver\ReplyCode\ReplyCode;
+use iggyvolz\Mailserver\ReplyCode\ReplyCodeException;
 use iggyvolz\Mailserver\ReplyCode\ServiceReady;
 use iggyvolz\Mailserver\ReplyCode\StartMailInput;
 
@@ -26,13 +30,13 @@ final class Session
 {
 
     private function __construct(
-        private readonly Mailserver $mailserver,
+        private readonly MailServer $mailserver,
         private readonly ReadableStream $reader,
         private readonly WritableStream $writer,
     ) {
         $this->mailData = new WritableBuffer();
     }
-    public static function handle(Mailserver $mailserver, ReadableStream $read, WritableStream $write): void
+    public static function handle(MailServer $mailserver, ReadableStream $read, WritableStream $write): void
     {
         try {
             (new self($mailserver, $read, $write))->doHandle();
@@ -71,7 +75,7 @@ final class Session
                     if($line === '.') {
                         // Data is over
                         $this->dataMode = false;
-                        $this->writer->write(new Okay());
+                        $this->writer->write(new Okay('localhost'));
                         $this->mailData->close();
                         $this->mailserver->addMessage($this->from, $this->to, $this->mailData->buffer());
                         $this->handleCommand(new ResetCommand());
@@ -84,8 +88,8 @@ final class Session
                 } else {
                     try {
                         $replyCode = $this->handleCommand(Command::from($line));
-                    } catch(ReplyCode $_replyCode) {
-                        $replyCode = $_replyCode;
+                    } catch(ReplyCodeException $replyCodeException) {
+                        $replyCode = $replyCodeException->replyCode;
                     }
                     if(!is_null($replyCode)) {
                         $this->writer->write($replyCode);
@@ -95,10 +99,16 @@ final class Session
         }
     }
 
-    private function handleCommand(Command $command): ReplyCode
+    private function handleCommand(Command $command): ?ReplyCode
     {
         if($command instanceof HelloCommand) {
             return new Okay();
+        } elseif($command instanceof ExtendedHelloCommand) {
+            $extensions = [];
+            if($this->writer instanceof EncryptableSocket) {
+                $extensions[] = "STARTTLS";
+            }
+            return new Okay("localhost", $extensions);
         } elseif($command instanceof MailCommand) {
             // Reset buffers
             $this->from = $command->from;
@@ -127,8 +137,13 @@ final class Session
             $this->closing = true;
             $this->mailserver->cancellation->cancel();
             return new Closing();
-        } else {
-            throw new CommandNotImplemented($command::class);
+        } elseif($command instanceof StartTlsCommand) {
+            if($this->writer instanceof EncryptableSocket) {
+                $this->writer->write(new ServiceReady("Ready to start TLS"));
+                $this->writer->setupTls();
+                return null;
+            }
         }
+        throw new ReplyCodeException(new CommandNotImplemented($command::class));
     }
 }

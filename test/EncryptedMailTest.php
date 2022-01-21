@@ -1,7 +1,6 @@
 <?php
 
 use Amp\Parallel\Context\ProcessContext;
-use iggyvolz\Mailserver\MailServer;
 use iggyvolz\Mailserver\Message;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -10,17 +9,24 @@ use Tester\Environment;
 use function Amp\Socket\connect;
 
 require_once __DIR__ . "/../vendor/autoload.php";
-\Tester\Environment::lock('port2525', __DIR__);
+Environment::lock('port2525', __DIR__);
+
 
 try {
 
     $mailer = ProcessContext::start(__DIR__ . "/runmailer.php");
     Environment::setup();
     $mail = new PHPMailer(true);
-    $mail->SMTPSecure = false;
-    $mail->SMTPAutoTLS = false;
-//    $mail->SMTPDebug = SMTP::DEBUG_LOWLEVEL;
     $mail->isSMTP();
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->SMTPOptions = array(
+        'ssl' => array(
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+            'allow_self_signed' => true
+        )
+    );
+//    $mail->SMTPDebug = SMTP::DEBUG_LOWLEVEL;
     $mail->setFrom($from = "from@example.com");
     $to = [];
     $mail->addAddress($to[] = "to@example.com");

@@ -4,9 +4,8 @@ namespace iggyvolz\Mailserver\ReplyCode;
 
 final class SyntaxError extends ReplyCode
 {
-    public function __construct(
-    )
+    public function __toString(): string
     {
-        parent::__construct(500);
+        return "500 Syntax Error\r\n";
     }
 }

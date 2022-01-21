@@ -8,11 +8,10 @@ final class Closing extends ReplyCode
         public readonly ?string $text = null
     )
     {
-        parent::__construct(221);
     }
 
-    protected function toString(): string
+    public function __toString(): string
     {
-        return $this->text ?? "";
+        return "221 " . $this->text ?? "";
     }
 }

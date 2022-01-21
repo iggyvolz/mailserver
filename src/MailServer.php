@@ -7,7 +7,7 @@ use Amp\Socket\SocketServer;
 use function Amp\async;
 use function Amp\Future\await;
 
-class Mailserver
+class MailServer
 {
     private array $messages = [];
     public readonly DeferredCancellation $cancellation;

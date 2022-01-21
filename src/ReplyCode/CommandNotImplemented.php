@@ -8,10 +8,9 @@ final class CommandNotImplemented extends ReplyCode
         public readonly string $method,
     )
     {
-        parent::__construct(502);
     }
-    protected function toString(): string
+    public function __toString(): string
     {
-        return "Method $this->method not implemented";
+        return "502 Method $this->method not implemented";
     }
 }
